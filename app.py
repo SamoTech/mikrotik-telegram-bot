@@ -11,7 +11,7 @@ ROUTER_PASS = os.getenv('ROUTER_PASS')
 
 pool = RouterOsApiPool(ROUTER_HOST, username=ROUTER_USER, password=ROUTER_PASS, port=ROUTER_PORT, use_ssl=False, plaintext_login=True)
 
-KEYBOARD = {'keyboard': [[{'text': 'السرعات'}, {'text': 'الأجهزة'}], [{'text': 'الحالة'}, {'text': 'الأعلى'}], [{'text': 'Scripts'}, {'text': 'Backup'}]], 'resize_keyboard': True}
+KB = {'keyboard': [[{'text': 'Speed'}, {'text': 'Devices'}], [{'text': 'Status'}, {'text': 'Top5'}], [{'text': 'Backup'}, {'text': 'Logs'}]], 'resize_keyboard': True}
 
 @app.route(f'/{BOT_TOKEN}', methods=['POST'])
 def webhook():
@@ -21,80 +21,70 @@ def webhook():
     try:
         api = pool.get_api()
         msg = ""
-        if text in ['السرعات', '/b']:
-            queues = api.get_resource('/queue/simple').call('print')
-            msg = "السرعات الحالية:
+        if text in ['Speed', '/b']:
+            q = api.get_resource('/queue/simple').call('print')
+            msg = "Current Speed:
 
-"
-            for q in queues[:10]:
-                msg += q.get('name', '?') + ": " + q.get('rate', '0/0') + "
-"
-        elif text in ['الأجهزة', '/d']:
-            leases = api.get_resource('/ip/dhcp-server/lease').call('print')
-            active = [l for l in leases if l.get('status') == 'bound'][:15]
-            msg = "الأجهزة المتصلة:
+" + "
+".join([f"{i.get('name','?')}: {i.get('rate','0/0')}" for i in q[:10]])
+        elif text in ['Devices', '/d']:
+            l = api.get_resource('/ip/dhcp-server/lease').call('print')
+            a = [i for i in l if i.get('status')=='bound'][:15]
+            msg = "Connected Devices:
 
-"
-            for l in active:
-                msg += l.get('mac-address', '?')[:17] + " -> " + l.get('address', '?') + "
-"
-        elif text in ['الحالة', '/s']:
-            res = api.get_resource('/system/resource').call('print')[0]
-            msg = "حالة الراوتر:
-CPU: " + str(res.get('cpu-load', '?')) + "%
-Uptime: " + str(res.get('uptime', '?'))
-        elif text in ['الأعلى', '/top']:
-            queues = api.get_resource('/queue/simple').call('print')
-            top = []
-            for q in queues:
+" + "
+".join([f"{i.get('mac-address','?')[:17]} -> {i.get('address','?')}" for i in a])
+        elif text in ['Status', '/s']:
+            r = api.get_resource('/system/resource').call('print')[0]
+            msg = f"Router Status:
+CPU: {r.get('cpu-load','?')}%
+Uptime: {r.get('uptime','?')}"
+        elif text in ['Top5', '/top']:
+            q = api.get_resource('/queue/simple').call('print')
+            t = []
+            for i in q:
                 try:
-                    down = int(q.get('bytes', '0/0').split('/')[1])
-                    top.append((q.get('name', '?'), down))
+                    b = int(i.get('bytes','0/0').split('/')[1])
+                    t.append((i.get('name','?'), b))
                 except:
                     pass
-            top.sort(key=lambda x: x[1], reverse=True)
-            msg = "أعلى 5 استهلاك:
+            t.sort(key=lambda x:x[1], reverse=True)
+            msg = "Top 5 Usage:
 
-"
-            for i, (name, b) in enumerate(top[:5], 1):
-                msg += str(i) + ". " + name + ": " + str(b//(1024*1024)) + "MB
-"
-        elif text == '/run_auto':
-            api.get_resource('/system/script').call('run', {'number': 'auto-queue-dhcp'})
-            msg = "تم تشغيل auto-queue"
-        elif text == '/logs':
-            logs = api.get_resource('/log').call('print')
-            msg = "آخر 5 logs:
-
-"
-            for log in logs[-5:]:
-                msg += log.get('time', '?') + ": " + log.get('message', '?')[:40] + "
-"
-        elif text == 'Backup':
+" + "
+".join([f"{idx}. {n}: {b//(1024*1024)}MB" for idx,(n,b) in enumerate(t[:5],1)])
+        elif text in ['Backup', '/backup']:
             import time
-            name = "bot-" + str(int(time.time()))
-            api.get_resource('/system/backup').call('save', {'name': name})
-            msg = "Backup تم: " + name + ".backup"
+            n = f"bot-{int(time.time())}"
+            api.get_resource('/system/backup').call('save', {'name': n})
+            msg = f"Backup done: {n}.backup"
+        elif text in ['Logs', '/logs']:
+            lg = api.get_resource('/log').call('print')
+            msg = "Last 5 logs:
+
+" + "
+".join([f"{i.get('time','?')}: {i.get('message','?')[:40]}" for i in lg[-5:]])
         elif text.startswith('block '):
             ip = text.split('block ')[1]
-            api.get_resource('/ip/firewall/address-list').call('add', {'list': 'blocked', 'address': ip})
-            msg = "تم حظر " + ip
+            api.get_resource('/ip/firewall/address-list').call('add', {'list':'blocked','address':ip})
+            msg = f"Blocked {ip}"
         else:
-            msg = "البوت جاهز!
+            msg = "MikroTik Bot Ready!
 
-السرعات - Bandwidth
-الأجهزة - Devices
-الحالة - Status
-الأعلى - Top 5
-Backup - نسخ احتياطي
+Speed - Bandwidth
+Devices - DHCP List
+Status - Router Info
+Top5 - Top Consumers
+Backup - Save Config
+Logs - View Logs
 
-أوامر: /logs /run_auto
-block IP - حظر"
+Commands:
+block IP - Block device"
     except Exception as e:
-        msg = "خطأ: " + str(e)
-    requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json={'chat_id': chat_id, 'text': msg, 'reply_markup': KEYBOARD})
+        msg = f"Error: {str(e)}"
+    requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json={'chat_id':chat_id,'text':msg,'reply_markup':KB})
     return jsonify(ok=True)
 
 if __name__ == '__main__':
-    print("Bot started")
-    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 10000)))
+    print("MikroTik Bot Started")
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT',10000)))
