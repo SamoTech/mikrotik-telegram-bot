@@ -92,17 +92,38 @@ def send_message(chat_id, text, keyboard=None):
 
 # ============== Commands ==============
 def cmd_speed(chat_id):
-    """Get bandwidth usage"""
+    """Get bandwidth usage with device names"""
     if not pool:
         return "❌ Router offline"
     try:
         api = pool.get_api()
+        
+        # Get all DHCP leases to map IPs to device names
+        leases = api.get_resource('/ip/dhcp-server/lease').call('print')
+        device_names = {}
+        for lease in leases:
+            ip = lease.get('address', '')
+            name = lease.get('comment', '').strip()
+            if not name:
+                name = lease.get('host-name', '').strip()
+            if name and ip:
+                device_names[ip] = name
+        
+        # Get queues
         q = api.get_resource('/queue/simple').call('print')
         if not q:
             return "📊 No bandwidth data"
+        
         msg = "📊 Current Bandwidth:\n\n"
         for i, item in enumerate(q[:10], 1):
-            msg += f"{i}. {item.get('name','?')}: {item.get('rate','0/0')}\n"
+            queue_name = item.get('name', '?')
+            rate = item.get('rate', '0/0')
+            
+            # Try to get device name from target IP
+            target = item.get('target', '')
+            display_name = device_names.get(target, queue_name)
+            
+            msg += f"{i}. {display_name}: {rate}\n"
         return msg
     except Exception as e:
         logger.error(f"Speed error: {e}")
@@ -152,20 +173,38 @@ def cmd_status(chat_id):
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_top5(chat_id):
-    """Get top 5 consumers"""
+    """Get top 5 consumers with device names"""
     if not pool:
         return "❌ Router offline"
     try:
         api = pool.get_api()
+        
+        # Get all DHCP leases to map IPs to device names
+        leases = api.get_resource('/ip/dhcp-server/lease').call('print')
+        device_names = {}
+        for lease in leases:
+            ip = lease.get('address', '')
+            name = lease.get('comment', '').strip()
+            if not name:
+                name = lease.get('host-name', '').strip()
+            if name and ip:
+                device_names[ip] = name
+        
+        # Get queues and sort by bandwidth
         q = api.get_resource('/queue/simple').call('print')
         t = []
         for i in q:
             try:
                 rate = i.get('rate', '0/0')
                 b = int(rate.split('/')[1]) if '/' in rate else 0
-                t.append((i.get('name', '?'), b))
+                queue_name = i.get('name', '?')
+                target = i.get('target', '')
+                # Use device name if available, otherwise queue name
+                display_name = device_names.get(target, queue_name)
+                t.append((display_name, b))
             except:
                 pass
+        
         t.sort(key=lambda x: x[1], reverse=True)
         if not t:
             return "🔥 No data"
