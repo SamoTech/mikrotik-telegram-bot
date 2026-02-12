@@ -57,7 +57,8 @@ ADMIN_KB = {
         [{'text': '🗂️ Backup'}, {'text': '📝 Logs'}],
         [{'text': '📈 Traffic'}, {'text': '🚫 Firewall'}],
         [{'text': '🔒 Block IP'}, {'text': '✅ Unblock IP'}],
-        [{'text': '💻 Terminal'}, {'text': '❓ Help'}]
+        [{'text': '💻 Terminal'}, {'text': '📋 Checklist'}],
+        [{'text': '❓ Help'}]
     ],
     'resize_keyboard': True
 }
@@ -399,6 +400,126 @@ def cmd_terminal(chat_id, command):
         logger.error(f"Terminal error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
+def cmd_daily_checklist(chat_id):
+    """Run daily monitoring checklist"""
+    if not pool:
+        return "❌ Router offline"
+    if not is_admin(chat_id):
+        return "🔒 Admin only"
+    
+    try:
+        api = pool.get_api()
+        msg = "📋 Daily System Checklist\n\n"
+        
+        # 1. System Health
+        msg += "━━━━━ 🔧 SYSTEM HEALTH ━━━━━\n"
+        try:
+            resource = api.get_resource('/system/resource').call('print')[0]
+            cpu = resource.get('cpu-load', '?')
+            mem_total = int(resource.get('total-memory', 0))
+            mem_free = int(resource.get('free-memory', 0))
+            mem_used = mem_total - mem_free
+            mem_percent = (mem_used / mem_total * 100) if mem_total > 0 else 0
+            uptime = resource.get('uptime', '?')
+            
+            msg += f"✅ CPU Load: {cpu}%\n"
+            msg += f"✅ Memory: {mem_percent:.1f}% used\n"
+            msg += f"✅ Uptime: {uptime}\n"
+            msg += f"✅ Version: {resource.get('version', '?')}\n\n"
+        except Exception as e:
+            msg += f"❌ Error: {str(e)[:50]}\n\n"
+        
+        # 2. Connected Devices
+        msg += "━━━━━ 📱 CONNECTED DEVICES ━━━━━\n"
+        try:
+            leases = api.get_resource('/ip/dhcp-server/lease').call('print')
+            bound = [l for l in leases if l.get('status') == 'bound']
+            msg += f"✅ Connected: {len(bound)} devices\n"
+            for device in bound[:3]:
+                name = device.get('comment', device.get('host-name', 'Unknown'))
+                ip = device.get('address', '?')
+                msg += f"   • {name}: {ip}\n"
+            if len(bound) > 3:
+                msg += f"   ... and {len(bound)-3} more\n"
+            msg += "\n"
+        except Exception as e:
+            msg += f"❌ Error: {str(e)[:50]}\n\n"
+        
+        # 3. Bandwidth Status
+        msg += "━━━━━ 📊 BANDWIDTH STATUS ━━━━━\n"
+        try:
+            queues = api.get_resource('/queue/simple').call('print')
+            active = [q for q in queues if q.get('rate', '0/0') != '0/0']
+            msg += f"✅ Total Queues: {len(queues)}\n"
+            msg += f"✅ Active Traffic: {len(active)} queues\n"
+            
+            # Top consumer
+            if active:
+                leases = api.get_resource('/ip/dhcp-server/lease').call('print')
+                device_names = {}
+                for lease in leases:
+                    ip = lease.get('address', '')
+                    name = lease.get('comment', '').strip()
+                    if not name:
+                        name = lease.get('host-name', '').strip()
+                    if name and ip:
+                        device_names[ip] = name
+                
+                top_rate = max([int(q.get('rate', '0/0').split('/')[1] or 0) for q in active], default=0)
+                for q in active:
+                    if int(q.get('rate', '0/0').split('/')[1] or 0) == top_rate:
+                        target = q.get('target', '?')
+                        name = device_names.get(target, q.get('name', '?'))
+                        msg += f"✅ Top Consumer: {name}\n"
+                        break
+            msg += "\n"
+        except Exception as e:
+            msg += f"❌ Error: {str(e)[:50]}\n\n"
+        
+        # 4. Security Status
+        msg += "━━━━━ 🔒 SECURITY ━━━━━\n"
+        try:
+            # Check firewall
+            rules = api.get_resource('/ip/firewall/filter').call('print')
+            msg += f"✅ Firewall Rules: {len(rules)} active\n"
+            
+            # Check address list (blocked IPs)
+            blocked = api.get_resource('/ip/firewall/address-list').call('print')
+            blocked_list = [b for b in blocked if b.get('list') == 'blocked']
+            msg += f"✅ Blocked IPs: {len(blocked_list)}\n"
+            
+            # Check recent logs
+            logs = api.get_resource('/log').call('print')
+            critical = [l for l in logs if 'critical' in l.get('topics', '').lower()]
+            msg += f"✅ Critical Logs: {len(critical)}\n\n"
+        except Exception as e:
+            msg += f"❌ Error: {str(e)[:50]}\n\n"
+        
+        # 5. Services
+        msg += "━━━━━ 🌐 SERVICES ━━━━━\n"
+        try:
+            services = api.get_resource('/ip/service').call('print')
+            enabled = [s for s in services if not s.get('disabled')]
+            msg += f"✅ Services Enabled: {len(enabled)}\n"
+            for svc in enabled[:4]:
+                port = svc.get('port', '?')
+                name = svc.get('name', '?')
+                msg += f"   • {name}: {port}\n"
+            msg += "\n"
+        except Exception as e:
+            msg += f"❌ Error: {str(e)[:50]}\n\n"
+        
+        # 6. Summary
+        msg += "━━━━━ ✅ SUMMARY ━━━━━\n"
+        msg += "All systems operational\n"
+        msg += "Check details with /terminal command\n"
+        
+        return msg
+        
+    except Exception as e:
+        logger.error(f"Daily checklist error: {e}")
+        return f"❌ Error: {str(e)[:80]}"
+
 def cmd_help(chat_id):
     """Show help"""
     admin = is_admin(chat_id)
@@ -414,11 +535,11 @@ def cmd_help(chat_id):
         msg += "🗂️ Backup - Save config\n"
         msg += "🚫 Firewall - View rules\n"
         msg += "🔒 Block/Unblock IP\n"
-        msg += "💻 Terminal - Run commands\n\n"
+        msg += "💻 Terminal - Run commands\n"
+        msg += "📋 Checklist - Daily health check\n\n"
         msg += "Format:\n"
         msg += "block 192.168.1.100\n"
         msg += "terminal /system/resource\n"
-        msg += "terminal /ip/address print\n"
     return msg
 
 # ============== Main Webhook ==============
@@ -469,6 +590,8 @@ def webhook():
             reply = cmd_help(chat_id)
         elif text in ['Terminal', '/terminal', '💻 Terminal']:
             reply = "💻 Terminal Mode\n\nSend commands like:\n/system/resource\n/ip/address print\n/interface print\n\nExample:\nterminal /system/resource"
+        elif text in ['Checklist', '/checklist', '📋 Checklist']:
+            reply = cmd_daily_checklist(chat_id)
         
         # Inline commands
         elif text.lower().startswith('block '):
