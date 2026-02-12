@@ -57,7 +57,7 @@ ADMIN_KB = {
         [{'text': '🗂️ Backup'}, {'text': '📝 Logs'}],
         [{'text': '📈 Traffic'}, {'text': '🚫 Firewall'}],
         [{'text': '🔒 Block IP'}, {'text': '✅ Unblock IP'}],
-        [{'text': '❓ Help'}]
+        [{'text': '💻 Terminal'}, {'text': '❓ Help'}]
     ],
     'resize_keyboard': True
 }
@@ -299,6 +299,67 @@ def cmd_unblock(chat_id, ip):
         logger.error(f"Unblock error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
+def cmd_terminal(chat_id, command):
+    """Execute terminal command on router"""
+    if not pool:
+        return "❌ Router offline"
+    if not is_admin(chat_id):
+        return "🔒 Admin only"
+    
+    # Block dangerous commands
+    dangerous = ['reboot', 'reset', 'shutdown', 'remove', 'delete']
+    if any(cmd in command.lower() for cmd in dangerous):
+        logger.warning(f"Blocked dangerous command from {chat_id}: {command}")
+        return "🔒 Dangerous command blocked. Use WebFig for system changes."
+    
+    try:
+        api = pool.get_api()
+        
+        # Parse command path and parameters
+        # Format: /system/resource or /ip/address print etc.
+        parts = command.strip().split()
+        if not parts:
+            return "❌ Invalid command"
+        
+        path = parts[0]
+        action = parts[1] if len(parts) > 1 else 'print'
+        
+        # Validate path starts with /
+        if not path.startswith('/'):
+            return "❌ Command must start with / (e.g., /system/resource)"
+        
+        # Execute command
+        try:
+            resource = api.get_resource(path)
+            
+            if action == 'print':
+                result = resource.call('print')
+                if isinstance(result, list):
+                    if not result:
+                        return f"No data from {path}"
+                    msg = f"📟 {path}\n\n"
+                    # Show first 5 results max
+                    for i, item in enumerate(result[:5], 1):
+                        msg += f"─ Entry {i}:\n"
+                        for key, value in list(item.items())[:5]:
+                            if key not in ['.id', '.path']:
+                                msg += f"  {key}: {str(value)[:50]}\n"
+                        msg += "\n"
+                    if len(result) > 5:
+                        msg += f"... and {len(result)-5} more entries"
+                    return msg
+                else:
+                    return f"Result: {str(result)[:200]}"
+            else:
+                return f"❌ Action '{action}' not supported. Use: /path/to/resource print"
+                
+        except Exception as e:
+            return f"❌ Command error: {str(e)[:100]}"
+        
+    except Exception as e:
+        logger.error(f"Terminal error: {e}")
+        return f"❌ Error: {str(e)[:80]}"
+
 def cmd_help(chat_id):
     """Show help"""
     admin = is_admin(chat_id)
@@ -314,7 +375,11 @@ def cmd_help(chat_id):
         msg += "🗂️ Backup - Save config\n"
         msg += "🚫 Firewall - View rules\n"
         msg += "🔒 Block/Unblock IP\n"
-        msg += "\nFormat: block 192.168.1.100\n"
+        msg += "💻 Terminal - Run commands\n\n"
+        msg += "Format:\n"
+        msg += "block 192.168.1.100\n"
+        msg += "terminal /system/resource\n"
+        msg += "terminal /ip/address print\n"
     return msg
 
 # ============== Main Webhook ==============
@@ -363,6 +428,8 @@ def webhook():
             reply = cmd_firewall(chat_id)
         elif text in ['Help', '/help', '❓ Help']:
             reply = cmd_help(chat_id)
+        elif text in ['Terminal', '/terminal', '💻 Terminal']:
+            reply = "💻 Terminal Mode\n\nSend commands like:\n/system/resource\n/ip/address print\n/interface print\n\nExample:\nterminal /system/resource"
         
         # Inline commands
         elif text.lower().startswith('block '):
@@ -371,6 +438,9 @@ def webhook():
         elif text.lower().startswith('unblock '):
             ip = text.split('unblock ', 1)[1].strip()
             reply = cmd_unblock(chat_id, ip)
+        elif text.lower().startswith('terminal '):
+            cmd = text.split('terminal ', 1)[1].strip()
+            reply = cmd_terminal(chat_id, cmd)
         
         else:
             reply = cmd_help(chat_id)
