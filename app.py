@@ -120,13 +120,15 @@ def cmd_devices(chat_id):
             return "📱 No devices connected"
         msg = f"📱 Connected Devices ({len(a)}):\n\n"
         for i, d in enumerate(a, 1):
-            mac = d.get('mac-address', '?')[:17]
+            # Get device name from comment, or use hostname, or fallback to MAC
+            name = d.get('comment', '').strip()
+            if not name:
+                name = d.get('host-name', '').strip()
+            if not name:
+                name = d.get('mac-address', '?')[:17]
+            
             ip = d.get('address', '?')
-            host = d.get('comment', '')
-            msg += f"{i}. {mac} → {ip}"
-            if host:
-                msg += f" ({host})"
-            msg += "\n"
+            msg += f"{i}. {name} → {ip}\n"
         return msg
     except Exception as e:
         logger.error(f"Devices error: {e}")
