@@ -98,7 +98,6 @@ def cmd_speed(chat_id):
     try:
         api = pool.get_api()
         q = api.get_resource('/queue/simple').call('print')
-        pool.release_api(api)
         if not q:
             return "📊 No bandwidth data"
         msg = "📊 Current Bandwidth:\n\n"
@@ -106,6 +105,7 @@ def cmd_speed(chat_id):
             msg += f"{i}. {item.get('name','?')}: {item.get('rate','0/0')}\n"
         return msg
     except Exception as e:
+        logger.error(f"Speed error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_devices(chat_id):
@@ -115,7 +115,6 @@ def cmd_devices(chat_id):
     try:
         api = pool.get_api()
         l = api.get_resource('/ip/dhcp-server/lease').call('print')
-        pool.release_api(api)
         a = [i for i in l if i.get('status') == 'bound'][:15]
         if not a:
             return "📱 No devices connected"
@@ -130,6 +129,7 @@ def cmd_devices(chat_id):
             msg += "\n"
         return msg
     except Exception as e:
+        logger.error(f"Devices error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_status(chat_id):
@@ -139,7 +139,6 @@ def cmd_status(chat_id):
     try:
         api = pool.get_api()
         r = api.get_resource('/system/resource').call('print')[0]
-        pool.release_api(api)
         msg = "⚙️ Router Status:\n\n"
         msg += f"CPU: {r.get('cpu-load','?')}%\n"
         msg += f"Uptime: {r.get('uptime','?')}\n"
@@ -147,6 +146,7 @@ def cmd_status(chat_id):
         msg += f"Version: {r.get('version','?')}\n"
         return msg
     except Exception as e:
+        logger.error(f"Status error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_top5(chat_id):
@@ -156,7 +156,6 @@ def cmd_top5(chat_id):
     try:
         api = pool.get_api()
         q = api.get_resource('/queue/simple').call('print')
-        pool.release_api(api)
         t = []
         for i in q:
             try:
@@ -173,6 +172,7 @@ def cmd_top5(chat_id):
             msg += f"{idx}. {n}: {format_bytes(b)}\n"
         return msg
     except Exception as e:
+        logger.error(f"Top5 error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_traffic(chat_id):
@@ -182,7 +182,6 @@ def cmd_traffic(chat_id):
     try:
         api = pool.get_api()
         ifaces = api.get_resource('/interface').call('print')
-        pool.release_api(api)
         if not ifaces:
             return "📈 No interfaces"
         msg = "📈 Interface Traffic:\n\n"
@@ -193,6 +192,7 @@ def cmd_traffic(chat_id):
             msg += f"{name}: ↓{format_bytes(rx)} ↑{format_bytes(tx)}\n"
         return msg
     except Exception as e:
+        logger.error(f"Traffic error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_backup(chat_id):
@@ -206,10 +206,10 @@ def cmd_backup(chat_id):
         api = pool.get_api()
         name = f"bot-{int(time.time())}"
         api.get_resource('/system/backup').call('save', {'name': name})
-        pool.release_api(api)
         logger.warning(f"Backup created by {chat_id}: {name}")
         return f"✅ Backup: {name}.backup"
     except Exception as e:
+        logger.error(f"Backup error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_logs(chat_id):
@@ -219,7 +219,6 @@ def cmd_logs(chat_id):
     try:
         api = pool.get_api()
         lg = api.get_resource('/log').call('print')
-        pool.release_api(api)
         if not lg:
             return "📝 No logs"
         msg = "📝 Last Logs:\n\n"
@@ -229,6 +228,7 @@ def cmd_logs(chat_id):
             msg += f"[{t}] {m}\n"
         return msg
     except Exception as e:
+        logger.error(f"Logs error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_firewall(chat_id):
@@ -240,7 +240,6 @@ def cmd_firewall(chat_id):
     try:
         api = pool.get_api()
         rules = api.get_resource('/ip/firewall/filter').call('print')[:10]
-        pool.release_api(api)
         if not rules:
             return "🚫 No rules"
         msg = "🚫 Firewall Rules:\n\n"
@@ -251,6 +250,7 @@ def cmd_firewall(chat_id):
             msg += f"{i}. [{action}] {proto}: {comment}\n"
         return msg
     except Exception as e:
+        logger.error(f"Firewall error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_block(chat_id, ip):
@@ -269,10 +269,10 @@ def cmd_block(chat_id, ip):
             'address': ip,
             'comment': 'blocked-by-bot'
         })
-        pool.release_api(api)
         logger.warning(f"IP blocked by {chat_id}: {ip}")
         return f"🚫 Blocked {ip}"
     except Exception as e:
+        logger.error(f"Block error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_unblock(chat_id, ip):
@@ -289,12 +289,12 @@ def cmd_unblock(chat_id, ip):
             if rule.get('address') == ip and rule.get('list') == 'blocked':
                 api.get_resource('/ip/firewall/address-list').call('remove', {'.id': rule['.id']})
                 found = True
-        pool.release_api(api)
         if not found:
             return f"❌ {ip} not found"
         logger.warning(f"IP unblocked by {chat_id}: {ip}")
         return f"✅ Unblocked {ip}"
     except Exception as e:
+        logger.error(f"Unblock error: {e}")
         return f"❌ Error: {str(e)[:80]}"
 
 def cmd_help(chat_id):
