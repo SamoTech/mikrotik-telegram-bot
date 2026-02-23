@@ -1,5 +1,16 @@
 # MikroTik Telegram Bot
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Made with Flask](https://img.shields.io/badge/Made%20with-Flask-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![GitHub Stars](https://img.shields.io/github/stars/SamoTech/mikrotik-telegram-bot?style=social)](https://github.com/SamoTech/mikrotik-telegram-bot/stargazers)
+[![GitHub](https://img.shields.io/badge/GitHub-SamoTech-181717?logo=github)](https://github.com/SamoTech)
+[![Twitter Follow](https://img.shields.io/twitter/follow/OssamaHashim?style=social)](https://twitter.com/OssamaHashim)
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-❤-pink?logo=github-sponsors)](https://github.com/sponsors/SamoTech)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/ossamahashim/)
+[![Email](https://img.shields.io/badge/Email-samo.hossam@gmail.com-red?logo=gmail&logoColor=white)](mailto:samo.hossam@gmail.com)
+[![Visitors](https://visitor-badge.laobi.icu/badge?page_id=SamoTech.mikrotik-telegram-bot)](https://github.com/SamoTech/mikrotik-telegram-bot)
+
 A powerful Telegram bot for managing and monitoring MikroTik RouterOS devices via webhook-based Flask application. Optimized for cloud deployment on Render.com.
 
 ## Features
@@ -348,6 +359,27 @@ For issues, feature requests, or questions:
 ## Disclaimer
 
 This bot has access to your RouterOS device configuration and network management. Use with caution and restrict admin access to trusted users only. The author is not responsible for any network changes or data loss caused by improper use.
+
+---
+
+## 🤝 Connect & Support
+
+<div align="center">
+
+[![GitHub](https://img.shields.io/badge/GitHub-SamoTech-181717?style=for-the-badge&logo=github)](https://github.com/SamoTech)
+[![Twitter](https://img.shields.io/badge/Twitter-@OssamaHashim-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/OssamaHashim)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ossama_Hashim-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ossamahashim/)
+[![Email](https://img.shields.io/badge/Email-samo.hossam@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:samo.hossam@gmail.com)
+
+### Support this Project
+
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor_on_GitHub-❤-EA4AAA?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/SamoTech)
+[![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/ossamahashim)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Support-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/ossamahashim)
+
+**Made with ❤️ in Cairo by [Ossama Hashim](https://github.com/SamoTech)**
+
+</div>
 
 ---
 
