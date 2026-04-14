@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040610"/>
+      <stop offset="100%" stop-color="#080c18"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="acc2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0L0 0 0 28" fill="none" stroke="#0d1128" stroke-width="1"/>
+    </pattern>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1280" height="320" fill="url(#bg)"/>
+  <rect width="1280" height="320" fill="url(#grid)"/>
+  <rect x="0" y="0" width="4" height="320" fill="url(#acc)"/>
+  <!-- Telegram chat mockup (right) -->
+  <g opacity="0.24" transform="translate(840,46)">
+    <rect x="0" y="0" width="370" height="228" rx="12" fill="#0a0e1c" stroke="#2563eb" stroke-width="1.5"/>
+    <!-- header -->
+    <rect x="0" y="0" width="370" height="36" rx="12" fill="#0d1530"/>
+    <circle cx="20" cy="18" r="10" fill="#2563eb" opacity="0.6"/>
+    <text x="36" y="23" font-family="monospace" font-size="13" fill="#bfdbfe">MikroTik Bot</text>
+    <circle cx="350" cy="18" r="5" fill="#22c55e"/>
+    <!-- bot messages -->
+    <rect x="10" y="44" width="240" height="32" rx="8" fill="#1a2048"/>
+    <text x="22" y="57" font-family="monospace" font-size="11" fill="#93c5fd">&#x1F4CA; Bandwidth Monitor</text>
+    <text x="22" y="70" font-family="monospace" font-size="10" fill="#6b7280">1. My Phone: 5.2M/2.1M</text>
+    <rect x="10" y="82" width="280" height="42" rx="8" fill="#1a2048"/>
+    <text x="22" y="96" font-family="monospace" font-size="11" fill="#93c5fd">&#x2699;&#xFE0F; Router Status</text>
+    <text x="22" y="110" font-family="monospace" font-size="10" fill="#6b7280">CPU: 15% · RAM: 42% · Up: 30d</text>
+    <text x="22" y="120" font-family="monospace" font-size="10" fill="#22c55e">RouterOS 7.9.2</text>
+    <rect x="10" y="130" width="220" height="32" rx="8" fill="#1a2048"/>
+    <text x="22" y="144" font-family="monospace" font-size="11" fill="#93c5fd">&#x1F525; Top 5 Consumers</text>
+    <text x="22" y="157" font-family="monospace" font-size="10" fill="#6b7280">Smart TV: 8.2M/320K</text>
+    <!-- user command -->
+    <rect x="130" y="170" width="220" height="24" rx="8" fill="#1e3a5f"/>
+    <text x="148" y="186" font-family="monospace" font-size="11" fill="#bfdbfe">block 192.168.1.105</text>
+    <rect x="10" y="200" width="200" height="22" rx="8" fill="#1a2048"/>
+    <text x="22" y="215" font-family="monospace" font-size="11" fill="#22c55e">&#x2705; IP blocked successfully</text>
+  </g>
+  <!-- logo: MikroTik router + Telegram icon -->
+  <g transform="translate(80,84)" filter="url(#glow)">
+    <rect x="0" y="0" width="116" height="116" rx="18" fill="#040610" stroke="url(#acc)" stroke-width="3"/>
+    <!-- router box -->
+    <rect x="14" y="38" width="88" height="40" rx="6" fill="none" stroke="url(#acc)" stroke-width="2.5"/>
+    <!-- ports -->
+    <rect x="22" y="52" width="10" height="14" rx="2" fill="#2563eb" opacity="0.7"/>
+    <rect x="38" y="52" width="10" height="14" rx="2" fill="#2563eb" opacity="0.7"/>
+    <rect x="54" y="52" width="10" height="14" rx="2" fill="#38bdf8" opacity="0.7"/>
+    <rect x="70" y="52" width="10" height="14" rx="2" fill="#22c55e" opacity="0.7"/>
+    <circle cx="94" cy="52" r="4" fill="#22c55e" opacity="0.9"/>
+    <!-- Telegram paper-plane badge -->
+    <circle cx="86" cy="30" r="16" fill="#2563eb"/>
+    <polygon points="75,30 92,24 88,38 83,34 80,38 79,32" fill="#fff" opacity="0.95"/>
+  </g>
+  <!-- wordmark -->
+  <text x="222" y="95" font-family="'SF Mono',Consolas,monospace" font-size="13" fill="#38bdf8" opacity="0.6" letter-spacing="4">ROUTEROS MANAGEMENT BOT</text>
+  <text x="218" y="165" font-family="Arial Black,'Arial Bold',sans-serif" font-size="60" font-weight="900" letter-spacing="-1" fill="#f0f8ff">MikroTik</text>
+  <text x="218" y="210" font-family="Arial Black,'Arial Bold',sans-serif" font-size="60" font-weight="900" letter-spacing="-1" fill="url(#acc)">Telegram Bot</text>
+  <rect x="220" y="226" width="500" height="2" fill="url(#acc)" opacity="0.45"/>
+  <!-- feature pills -->
+  <rect x="222" y="242" width="130" height="26" rx="13" fill="#2563eb" opacity="0.18"/>
+  <text x="287" y="260" font-family="monospace" font-size="12" fill="#93c5fd" text-anchor="middle">Bandwidth</text>
+  <rect x="364" y="242" width="110" height="26" rx="13" fill="#38bdf8" opacity="0.18"/>
+  <text x="419" y="260" font-family="monospace" font-size="12" fill="#bae6fd" text-anchor="middle">IP Block</text>
+  <rect x="486" y="242" width="110" height="26" rx="13" fill="#2563eb" opacity="0.18"/>
+  <text x="541" y="260" font-family="monospace" font-size="12" fill="#93c5fd" text-anchor="middle">Terminal</text>
+  <rect x="608" y="242" width="120" height="26" rx="13" fill="#22c55e" opacity="0.18"/>
+  <text x="668" y="260" font-family="monospace" font-size="12" fill="#86efac" text-anchor="middle">Checklist</text>
+  <text x="222" y="296" font-family="monospace" font-size="12" fill="#6b7280">Python 3.8+ · Flask Webhook · Render.com · RouterOS API</text>
+</svg>

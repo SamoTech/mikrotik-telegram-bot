@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" aria-label="MikroTik Telegram Bot">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#040610" stroke="url(#lg)" stroke-width="2"/>
+  <rect x="8" y="24" width="48" height="26" rx="5" fill="none" stroke="url(#lg)" stroke-width="2.5"/>
+  <rect x="14" y="32" width="7" height="10" rx="2" fill="#2563eb" opacity="0.8"/>
+  <rect x="26" y="32" width="7" height="10" rx="2" fill="#2563eb" opacity="0.8"/>
+  <rect x="38" y="32" width="7" height="10" rx="2" fill="#22c55e" opacity="0.8"/>
+  <circle cx="50" cy="14" r="10" fill="#2563eb"/>
+  <polygon points="44,14 52,10 50,18 47,16 45,19 44,15" fill="#fff"/>
+</svg>
